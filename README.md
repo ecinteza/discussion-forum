@@ -41,7 +41,7 @@ A simple and interactive web-based discussion forum where users can create threa
 
 ### Setup
 Clone the repository:
-- git clone https://github.com/YourUsername/discussion-forum.git
+- git clone https://github.com/ecinteza/discussion-forum.git
 - cd discussion-forum
 
 Install dependencies:
