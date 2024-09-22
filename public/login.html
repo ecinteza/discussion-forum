@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Discussion Forum</title>
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+  <div class="container">
+    <h1>Discussion Forum</h1>
+    <ul>
+      <li><a href="home.html">Home</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="register.html">Register</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Main Content Area -->
+<div class="container">
+  <h2>Login</h2>
+
+  <!-- Login Form -->
+  <section>
+    <form id="loginForm">
+      <label for="username">Username / E-Mail:</label>
+      <input type="text" id="username" name="username" required>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+      <button type="button" id="loginButton">Login</button>
+    </form>
+    <p>Don't have an account? <a href="register.html">Register here</a></p>
+  </section>
+</div>
+
+<script>
+  document.getElementById('loginButton').addEventListener('click', async () => {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token); // Store token in localStorage
+        window.location.href = '/home.html'; // Redirect to dashboard or desired page
+      } else {
+        alert(data.error); // Display error message
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login failed. Please try again.');
+    }
+  });
+</script>
+
+</body>
+</html>

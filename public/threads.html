@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Discussion Forum - Threads</title>
+  <link rel="stylesheet" href="css/threads.css">
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+  <div class="container">
+    <h1>Discussion Forum</h1>
+    <ul>
+      <li><a href="home.html">Home</a></li>
+      <li><a href="threads.html">Threads</a></li>
+      <li id="profileTab" style="display: none;"><a href="profile.html">Profile</a></li>
+      <li id="logoutTab" style="display: none;"><a href="#" onclick="logout()">Logout</a></li>
+      <li id="loginTab"><a href="login.html">Login</a></li>
+      <li id="registerTab"><a href="register.html">Register</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Main Content Area -->
+<div class="container">
+  <h2>Threads</h2>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by title or author">
+    <button id="searchBtn" onclick="searchPosts()">Search</button>
+    <button id="clearBtn" onclick="clearSearch()">Clear</button>
+  </div>
+
+  <!-- List of Threads -->
+  <section id="postList" class="thread-list">
+    <!-- Posts will be dynamically added here -->
+  </section>
+</div>
+
+<script>
+  fetch('/posts')
+  .then(response => response.json())
+  .then(posts => {
+    const postList = document.getElementById('postList');
+    posts.forEach(post => {
+      const postContainer = document.createElement('div');
+      postContainer.classList.add('post-container');
+
+      // Create a div for the post content
+      const postContent = document.createElement('div');
+      postContent.classList.add('post-content');
+
+      const postLink = document.createElement('a');
+      const truncatedTitle = post.title.length > 90 ? post.title.substring(0, 90) + '...' : post.title;
+      postLink.textContent = truncatedTitle;
+      postLink.href = `post.html?postId=${post.id}`;
+      postLink.classList.add('post-link');
+
+      postContent.appendChild(postLink);
+      postContainer.appendChild(postContent);
+
+      // Create a div for profile picture and username
+      const profileInfo = document.createElement('div');
+      profileInfo.classList.add('profile-info');
+
+      const profilePic = document.createElement('img');
+      profilePic.src = post.profile_picture_url;
+      profilePic.alt = `${post.username}'s Profile Picture`;
+      profilePic.classList.add('profile-picture');
+
+      const authorName = document.createElement('p');
+      authorName.textContent = `${post.username}`;
+      authorName.classList.add('post-author');
+
+      profileInfo.appendChild(profilePic);
+      profileInfo.appendChild(authorName);
+
+      // Append profile info to the post content div
+      postContent.appendChild(profileInfo);
+      postContainer.appendChild(postContent);
+
+      postList.appendChild(postContainer);
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching posts:', error);
+    alert('Failed to fetch posts. Please try again.');
+  });
+
+
+function searchPosts() {
+  const searchInput = document.getElementById('searchInput').value.toLowerCase();
+  const postContainers = document.querySelectorAll('.post-container');
+
+  postContainers.forEach(container => {
+    const postTitle = container.querySelector('.post-link').textContent.toLowerCase();
+    const postAuthor = container.querySelector('.post-author').textContent.toLowerCase();
+
+    if (postTitle.includes(searchInput) || postAuthor.includes(searchInput)) {
+      container.style.display = 'block';
+    } else {
+      container.style.display = 'none';
+    }
+  });
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = ''; // Clear the search input
+  const postContainers = document.querySelectorAll('.post-container');
+
+  postContainers.forEach(container => {
+    container.style.display = 'block'; // Display all post containers
+  });
+}
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // If user is logged in, display the profile, logout tabs and hide login, register tabs
+      document.getElementById('profileTab').style.display = 'inline';
+      document.getElementById('logoutTab').style.display = 'inline';
+      document.getElementById('loginTab').style.display = 'none';
+      document.getElementById('registerTab').style.display = 'none';
+    } else {
+      // If user is not logged in, hide profile, logout tabs and show login, register tabs
+      document.getElementById('profileTab').style.display = 'none';
+      document.getElementById('logoutTab').style.display = 'none';
+      document.getElementById('loginTab').style.display = 'inline';
+      document.getElementById('registerTab').style.display = 'inline';
+    }
+  });
+
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/login.html';
+  }
+</script>
+
+</body>
+</html>

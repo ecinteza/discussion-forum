@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Discussion Forum</title>
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <h1>Discussion Forum</h1>
+    <ul>
+      <li><a href="home.html">Home</a></li>
+      <li id="threadsTab" style="display: none;"><a href="threads.html">Threads</a></li>
+      <li id="profileTab" style="display: none;"><a href="profile.html">Profile</a></li>
+      <li id="logoutTab" style="display: none;"><a href="#" onclick="logout()">Logout</a></li>
+      <li id="loginTab"><a href="login.html">Login</a></li>
+      <li id="registerTab"><a href="register.html">Register</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <h2>Welcome to the Discussion Forum</h2>
+
+  <section id="loginSection">
+    <h3>Login or Register</h3>
+    <form id="loginForm" onsubmit="login(event)">
+      <label for="username">Username / E-Mail:</label>
+      <input type="text" id="loginUsername" name="username" required>
+      <label for="password">Password:</label>
+      <input type="password" id="loginPassword" name="password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="register.html">Register here</a></p>
+  </section>
+
+    <section id="userInfoSection" style="display: none;">
+      <h3>Welcome, <span id="usernameDisplay"></span>!</h3>
+     <!-- <p><a href="#" onclick="logout()">Logout</a></p> -->
+    </section>
+  </section>
+
+  <section id="createPostSection" style="display: none;">
+    <h3>Create a Thread</h3>
+    <form id="postForm">
+      <label for="postTitle">Title:</label>
+      <input type="text" id="postTitle" name="postTitle" required>
+      <label for="postContent">Content:</label>
+      <textarea id="postContent" name="postContent" required></textarea>
+      <button type="button" onclick="createPost()">Create</button>
+      <p id="validationMessage" style="color: red; display: none;">Please fill out this form.</p>
+    </form>
+
+    <section id="recentThreadsSection">
+      <h3>Most Recent Threads</h3>
+      <ul id="recentThreadsList" class="thread-list">
+      </ul>
+      <a id="seeAllThreadsLink" href="threads.html">See all threads...</a>
+    </section>
+  </section>
+
+  
+</div>
+
+<script>
+  async function createPost() {
+    const postTitle = document.getElementById('postTitle').value;
+    const postContent = document.getElementById('postContent').value;
+
+    if (!postTitle.trim() || !postContent.trim()) {
+      document.getElementById('validationMessage').style.display = 'block';
+      return;
+    }
+
+    try {
+      const response = await fetch('/createPost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token'),
+        },
+        body: JSON.stringify({ title: postTitle, content: postContent }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert('Post created successfully!');
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        document.getElementById('validationMessage').style.display = 'block';
+        return;
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      document.getElementById('validationMessage').style.display = 'block';
+      return;
+    }
+  }
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      document.getElementById('createPostSection').style.display = 'block';
+      validateToken(token);
+    }
+  });
+
+  async function createPost() {
+    const postTitle = document.getElementById('postTitle').value;
+    if (postTitle === '') {
+      alert('Please enter a post title.');
+      return;
+    }
+
+    const postContent = document.getElementById('postContent').value;
+    if (postContent === '') {
+      alert('Please enter content for your post.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/createPost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token'),
+        },
+        body: JSON.stringify({ title: postTitle, content: postContent }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert('Post created successfully!');
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to create post: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Failed to create post. Please try again.');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      validateToken(token);
+    } else {
+      showLoginRegisterTabs();
+    }
+  });
+
+  async function validateToken(token) {
+    try {
+      const response = await fetch('/validateToken', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        document.getElementById('usernameDisplay').textContent = data.username;
+        showProfileLogoutTabs();
+      } else {
+        showLoginRegisterTabs();
+      }
+    } catch (error) {
+      console.error('Token validation error:', error);
+    }
+  }
+
+  function showProfileLogoutTabs() {
+    document.getElementById('profileTab').style.display = 'inline';
+    document.getElementById('logoutTab').style.display = 'inline';
+    document.getElementById('loginTab').style.display = 'none';
+    document.getElementById('registerTab').style.display = 'none';
+    document.getElementById('threadsTab').style.display = 'inline';
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('userInfoSection').style.display = 'block';
+  }
+
+  function showLoginRegisterTabs() {
+    document.getElementById('profileTab').style.display = 'none';
+    document.getElementById('logoutTab').style.display = 'none';
+    document.getElementById('loginTab').style.display = 'inline';
+    document.getElementById('registerTab').style.display = 'inline';
+    document.getElementById('threadsTab').style.display = 'none';
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('userInfoSection').style.display = 'none';
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/login.html';
+  }
+
+  async function login(event) {
+    event.preventDefault();
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        window.location.href = '/home.html';
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login failed. Please try again.');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      validateToken(token);
+      await displayRecentThreads();
+    } else {
+      showLoginRegisterTabs();
+    }
+  });
+
+  async function displayRecentThreads() {
+  try {
+    const response = await fetch('/recentThreads', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': localStorage.getItem('token'),
+      },
+    });
+
+    if (response.ok) {
+      const threads = await response.json();
+      const recentThreadsList = document.getElementById('recentThreadsList');
+      const recentThreadsSection = document.getElementById('recentThreadsSection');
+      recentThreadsSection.style.display = 'block';
+
+      threads.forEach(thread => {
+        const listItem = document.createElement('li');
+        const link = document.createElement('a');
+        link.textContent = thread.title;
+        link.href = `post.html?postId=${thread.id}`;
+        link.classList.add('post-link');
+
+        const author = document.createElement('span');
+        author.textContent = `Posted by: ${thread.username}`;
+        author.classList.add('post-author');
+
+        listItem.appendChild(link);
+        listItem.appendChild(author);
+        recentThreadsList.appendChild(listItem);
+      });
+    } else {
+      const errorData = await response.json();
+      console.error('Failed to fetch recent threads:', errorData.error);
+    }
+  } catch (error) {
+    console.error('Error fetching recent threads:', error);
+  }
+}
+
+
+  function viewAllThreads() {
+    window.location.href = '/threads.html';
+  }
+
+</script>
+</body>
+</html>

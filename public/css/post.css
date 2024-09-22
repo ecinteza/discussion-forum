@@ -1,0 +1,169 @@
+/* post.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  .container {
+    width: 80%;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  
+  h2 {
+    margin: 40px 0;
+    text-align: center;
+  }
+  
+  .post-content {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #fff;
+    word-wrap: break-word;
+  }
+  
+  .post-content h3 {
+    margin-top: 0;
+    word-wrap: break-word;
+  }
+  
+  .post-content p {
+    margin-bottom: 10px;
+    word-wrap: break-word;
+  }
+  
+  a {
+    text-decoration: none;
+    color: #55acee;
+  }
+  
+  a:hover {
+    color: #0077cc;
+  }
+  
+  #commentForm {
+    margin-top: 30px;
+    margin-bottom: 20px;
+  }
+  
+  #commentText {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical; /* Allow vertical resizing of the textarea */
+  }
+  
+  #commentText:focus {
+    outline: none;
+    border-color: #55acee; /* Highlight textarea when focused */
+  }
+  
+  #commentButton {
+    background-color: #55acee;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+  }
+  
+  #commentButton:hover {
+    background-color: #0077cc; /* Darker shade on hover */
+  }
+
+  .comments-section {
+    margin-bottom: 200px; /* Adjust the value as needed */
+    word-wrap: break-word;
+  }
+
+  .profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .comments-section li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    word-break: break-word; /* Ensure word wrapping for longer words in comments */
+  }
+  
+  .user-details {
+    flex-grow: 1;
+    margin-left: 10px; /* Add margin to separate profile picture and user details */
+  }
+  
+  .user-details span {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block; /* Display the username in a block to break onto a new line */
+    word-wrap: break-word;
+  }
+  
+  .profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0; /* Prevent the profile picture from shrinking */
+  }
+  
+  .user-details p {
+    word-wrap: break-word; /* Ensure word wrapping for comment text */
+    margin: 0; /* Remove default margin for <p> elements */
+  }
+  
+  #commentList {
+    list-style: none;
+    padding: 0;
+  }
+  
+  #commentList li {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 10px;
+    background-color: #fff;
+  }
+
+  #backButton {
+    background-color: #55acee;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 40px; /* Adjust the margin top as needed */
+    margin-left: 20px; /* Adjust the margin left for positioning */
+  }
+  
+  #backButton:hover {
+    background-color: #0077cc;
+  }
+  
+  .profile-picture {
+    width: 30px; /* Adjust the size of the profile picture */
+    height: 30px; /* Adjust the height accordingly */
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0; /* Prevent the image from shrinking */
+  }
+
+  

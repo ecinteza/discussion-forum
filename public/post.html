@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Discussion Forum - Single Post</title>
+  <link rel="stylesheet" href="css/post.css"> <!-- Link to your post.css file -->
+</head>
+<body>
+  <button id="backButton" onclick="goBack()">
+    &lt; Back
+  </button>
+<div class="container">
+  <h2>Post Details</h2>
+  <div id="postDetails">
+    <!-- Content of the post will be dynamically added here -->
+  </div>
+  <form id="commentForm">
+    <textarea id="commentText" placeholder="Write your comment..." required></textarea>
+    <button type="submit" id="commentButton">Add Comment</button>
+  </form>
+  <div class="comments-section">
+    <h3>Comments</h3>
+    <ul id="commentList">
+      <!-- Comments will be displayed here -->
+    </ul>
+    <p id="noCommentsMessage" style="display: none;">No Comments... yet</p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      console.log('Token:', token);
+      redirectToLogin();
+    } else {
+      const validationStatus = await validateToken(token);
+      console.log('Validation Status:', validationStatus);
+
+      if (validationStatus === 'valid') {
+        await fetchPostDetails();
+        setupCommentForm();
+        // Other actions specific to a logged-in user...
+      } else {
+        redirectToLogin();
+      }
+    }
+  });
+
+  async function validateToken(token) {
+    try {
+      const response = await fetch('/validateToken', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (response.ok) {
+        return 'valid';
+      } else {
+        return 'invalid';
+      }
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return 'error';
+    }
+  }
+
+  function redirectToLogin() {
+    console.log('Redirecting to login page...');
+    window.location.href = '/login.html';
+  }
+
+  // Fetch post details
+  // Fetch post details
+async function fetchPostDetails() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('postId');
+
+    const postResponse = await fetch(`/posts/${postId}`);
+    const postData = await postResponse.json();
+
+    const postContent = document.createElement('div');
+    postContent.classList.add('post-content');
+
+    const profilePicture = document.createElement('img');
+    profilePicture.src = postData.profile_picture_url; // Assuming profile_picture_url is available in post data
+    profilePicture.alt = 'Profile Picture';
+    profilePicture.classList.add('profile-picture');
+
+    const username = document.createElement('p');
+    username.textContent = postData.username;
+
+    const title = document.createElement('h3');
+    title.textContent = postData.title; // Assuming title is available in post data
+
+    const postText = document.createElement('p');
+    postText.textContent = postData.content; // Assuming content is available in post data
+
+    postContent.appendChild(profilePicture);
+    postContent.appendChild(username);
+    postContent.appendChild(title);
+    postContent.appendChild(postText);
+
+    document.getElementById('postDetails').appendChild(postContent);
+
+    // Fetch comments for the post
+    await fetchPostComments(postId);
+  } catch (error) {
+    console.error('Error fetching post details:', error);
+    alert('Failed to fetch post details. Please try again.');
+  }
+}
+
+
+
+  // Fetch comments for the post
+  async function fetchPostComments(postId) {
+  try {
+    const commentsResponse = await fetch(`/posts/${postId}/comments`);
+    const commentsData = await commentsResponse.json();
+    const commentList = document.getElementById('commentList');
+    const noCommentsMessage = document.getElementById('noCommentsMessage');
+
+    if (commentsData && commentsData.length > 0) {
+      commentList.innerHTML = ''; // Clear existing comments before displaying new ones
+      commentsData.reverse().forEach(comment => { // Reverse the order of comments
+        const listItem = document.createElement('li');
+
+        const profilePicture = document.createElement('img');
+        profilePicture.src = comment.profile_picture_url; // Assuming profile_picture_url is available in comment data
+        profilePicture.alt = 'Profile Picture';
+        profilePicture.classList.add('profile-picture');
+        
+        const userDetails = document.createElement('div');
+        userDetails.classList.add('user-details');
+        
+        const commentUser = document.createElement('span');
+        commentUser.textContent = comment.username;
+
+        const commentContent = document.createElement('p');
+        commentContent.textContent = comment.comment_text; // Assuming comment_text is available in comment data
+        commentContent.classList.add('comment-text'); // Adding a class for comment text
+
+        userDetails.appendChild(commentUser);
+        userDetails.appendChild(commentContent);
+
+        listItem.appendChild(profilePicture);
+        listItem.appendChild(userDetails);
+
+        commentList.appendChild(listItem);
+      });
+
+      noCommentsMessage.style.display = 'none'; // Hide the "No Comments" message
+    } else {
+      noCommentsMessage.style.display = 'block'; // Display the "No Comments" message
+    }
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    // Handle errors when fetching comments
+  }
+}
+
+
+  // Set up comment submission functionality
+  function setupCommentForm() {
+  const commentForm = document.getElementById('commentForm');
+  const token = localStorage.getItem('token');
+
+  commentForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const commentText = document.getElementById('commentText').value.trim(); // Trim whitespace
+
+    if (commentText === '') {
+      alert('Please enter a comment.'); // Display an alert or handle empty comment
+      return; // Stop execution if the comment is empty
+    }
+
+    try {
+      const postId = getPostId();
+      const response = await fetch(`/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify({ commentText })
+      });
+
+      if (response.ok) {
+        // Clear the comment input field after successful comment addition
+        document.getElementById('commentText').value = '';
+        // Refresh comments after adding a new comment
+        await fetchPostComments(postId);
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to add comment:', errorData.error);
+        // Handle the error - display an appropriate message to the user
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      // Handle network errors or other exceptions
+    }
+  });
+}
+
+
+  // Get postId from URL parameters
+  function getPostId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('postId');
+  }
+
+  function goBack() {
+  window.history.back(); // Go back to the previous page in history
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - Discussion Forum</title>
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+  <div class="container">
+    <h1>Discussion Forum</h1>
+    <ul>
+      <li><a href="home.html">Home</a></li>
+      <li><a href="threads.html">Threads</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="#" onclick="logout()">Logout</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Profile Content Area -->
+<div class="container">
+  <h2>User Profile</h2>
+
+  <div id="editProfile" class="profile-section">
+    <h3>Edit Profile</h3>
+    <label for="editUsername">Username:</label>
+    <input type="text" id="editUsername" class="profile-input" disabled><br>
+    <label for="editEmail">Email:</label>
+    <input type="email" id="editEmail" class="profile-input" disabled><br>
+    <button id="editButton" onclick="enableEditMode()">Edit</button>
+    <button id="applyButton" onclick="applyChanges()" style="display: none;">Apply</button>
+    <button id="cancelButton" onclick="cancelEdit()" style="display: none;">Cancel</button>
+  </div>
+
+  <div class="profile-section">
+    <h3>Profile Picture</h3>
+    <div class="profile-picture">
+      <img id="profilePicture" src="" alt="Profile Picture">
+    </div>
+    <input type="file" id="profilePictureInput" accept="image/*">
+    <button onclick="uploadProfilePicture()">Upload Picture</button>
+  </div>
+
+  <div id="changePassword">
+    <h3>Change Password</h3>
+    <input type="password" id="currentPassword" placeholder="Current Password"><br>
+    <input type="password" id="newPassword" placeholder="New Password"><br>
+    <button onclick="changePassword()">Change Password</button>
+  </div>
+</div>
+
+<!-- Include JavaScript scripts here -->
+<script>
+  function displayProfilePicture(profileData) {
+  const profilePictureElement = document.getElementById('profilePicture');
+  console.log(profilePictureElement); // Add this line to verify the element existence
+  try {
+    if (profileData.profile_picture_url) {
+      profilePictureElement.src = profileData.profile_picture_url;
+    }
+  } catch (error) {
+    console.error('Error setting src attribute:', error);
+  }
+}
+
+
+  async function uploadProfilePicture() {
+    const token = localStorage.getItem('token');
+    const fileInput = document.getElementById('profilePictureInput');
+    const formData = new FormData();
+    formData.append('profilePicture', fileInput.files[0]); // 'profilePicture' should match the multer field name
+    
+    try {
+      const response = await fetch('/uploadProfilePicture', {
+        method: 'POST',
+        headers: {
+          'Authorization': token,
+        },
+        body: formData,
+      });
+
+
+      if (response.ok) {
+        // Profile picture uploaded successfully, fetch updated profile data
+        const updatedProfileResponse = await fetch('/profileData', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+          },
+        });
+
+        if (updatedProfileResponse.ok) {
+          const updatedProfileData = await updatedProfileResponse.json();
+          displayProfilePicture(updatedProfileData); // Update displayed profile picture
+        } else {
+          console.error('Failed to fetch updated profile data');
+        }
+
+        // Display success message and reload page after 2 seconds
+        alert('Profile picture uploaded successfully');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to upload profile picture');
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      alert('Error uploading profile picture. Please try again.');
+    }
+  }
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+      // User is logged in, you can fetch and display profile information here
+      fetchProfileData(token);
+    } else {
+      // User is not logged in, redirect to login page
+      window.location.href = '/login.html';
+    }
+  });
+
+  async function fetchProfileData(token) {
+    try {
+      const response = await fetch('/profileData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+      });
+
+      if (response.ok) {
+        const profileData = await response.json();
+        displayProfileInfo(profileData);
+        console.log(profileData); // Add this line before calling displayProfilePicture
+        displayProfilePicture(profileData); // Display the profile picture
+        populateEditFields(profileData); // Populate edit fields with existing data
+      } else {
+        console.error('Failed to fetch profile data');
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    }
+  }
+
+function displayProfileInfo(profileData) {
+    // Display user information in the editProfile section
+    document.getElementById('editUsername').value = profileData.username;
+    document.getElementById('editEmail').value = profileData.email;
+  }
+
+
+
+  function populateEditFields(profileData) {
+    document.getElementById('editUsername').value = profileData.username;
+    document.getElementById('editEmail').value = profileData.email;
+  }
+
+async function changePassword() {
+    const token = localStorage.getItem('token');
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+
+    try {
+      const response = await fetch('/changePassword', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      if (response.ok) {
+        // Password changed successfully
+        alert('Password changed successfully');
+
+        // Clear password fields
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      alert('Error changing password. Please try again.');
+    }
+  }
+
+  function enableEditMode() {
+  document.getElementById('editUsername').disabled = false;
+  document.getElementById('editEmail').disabled = false;
+  document.getElementById('editButton').style.display = 'none';
+  document.getElementById('cancelButton').style.display = 'inline-block';
+  document.getElementById('applyButton').style.display = 'inline-block';
+}
+
+function cancelEdit() {
+  // Reset the input fields to their initial values
+  const initialUsername = document.getElementById('editUsername').getAttribute('data-initial');
+  const initialEmail = document.getElementById('editEmail').getAttribute('data-initial');
+  document.getElementById('editUsername').value = initialUsername;
+  document.getElementById('editEmail').value = initialEmail;
+
+  // Disable inputs and toggle button visibility
+  document.getElementById('editUsername').disabled = true;
+  document.getElementById('editEmail').disabled = true;
+  document.getElementById('editButton').style.display = 'inline-block';
+  document.getElementById('cancelButton').style.display = 'none';
+  document.getElementById('applyButton').style.display = 'none';
+}
+
+function enableEditMode() {
+  // Enable input fields for editing
+  document.getElementById('editUsername').disabled = false;
+  document.getElementById('editEmail').disabled = false;
+
+  // Store initial values in data-initial attribute
+  document.getElementById('editUsername').setAttribute('data-initial', document.getElementById('editUsername').value);
+  document.getElementById('editEmail').setAttribute('data-initial', document.getElementById('editEmail').value);
+
+  // Toggle button visibility
+  document.getElementById('editButton').style.display = 'none';
+  document.getElementById('cancelButton').style.display = 'inline-block';
+  document.getElementById('applyButton').style.display = 'inline-block';
+}
+
+  function isValidEmail(email) {
+    // Regular expression pattern for basic email format validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  }
+
+  async function applyChanges() {
+  const token = localStorage.getItem('token');
+  const editedUsername = document.getElementById('editUsername').value;
+  const editedEmail = document.getElementById('editEmail').value;
+
+  // Check if fields are empty
+  if (!editedUsername || !editedEmail) {
+    alert('Username and Email fields cannot be empty');
+    return;
+  }
+
+  if (!isValidEmail(editedEmail)) {
+    alert('Invalid email format. Please enter a valid email address.');
+    return;
+  }
+
+  // Check if the username or email is the same as other users or the current user
+  const profileData = await fetch('/profileData', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token,
+    },
+  });
+
+  if (profileData.ok) {
+    const data = await profileData.json();
+    const currentUsername = data.username;
+    const currentEmail = data.email;
+
+    //if (editedUsername === currentUsername || editedEmail === currentEmail) {
+    //  alert('Username or Email is already in use');
+    //  return;
+    //}
+  } else {
+    console.error('Failed to fetch profile data');
+    return;
+  }
+
+  // Proceed with updating the profile
+  try {
+    const response = await fetch('/updateProfile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      body: JSON.stringify({ username: editedUsername, email: editedEmail }),
+    });
+
+    if (response.ok) {
+      // Profile updated successfully
+      alert('Profile updated successfully');
+      
+      // Disable inputs and toggle button visibility
+      document.getElementById('editUsername').disabled = true;
+      document.getElementById('editEmail').disabled = true;
+      document.getElementById('editButton').style.display = 'inline-block';
+      document.getElementById('applyButton').style.display = 'none';
+    } else {
+      const errorData = await response.json();
+      alert(errorData.error || 'Failed to update profile');
+    }
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    alert('Error updating profile. Please try again.');
+  }
+}
+
+
+  function logout() {
+    localStorage.removeItem('token'); // Remove the token from local storage
+    window.location.href = '/home.html'; // Redirect to the home page after logout
+  }
+</script>
+</body>
+</html>

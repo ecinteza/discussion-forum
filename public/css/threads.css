@@ -1,0 +1,179 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  nav {
+    background-color: #55acee;
+    color: white;
+  }
+  
+  .container {
+    width: 80%;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  
+  nav h1 {
+    padding: 20px 0;
+    float: left;
+  }
+  
+  nav ul {
+    float: right;
+    list-style: none;
+    padding: 20px 0;
+  }
+  
+  nav ul li {
+    display: inline;
+    margin-right: 20px;
+  }
+  
+  nav ul li a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  nav ul li a:hover {
+    color: #ddd;
+  }
+
+  .container h2 {
+    margin: 40px 0;
+    text-align: center;
+  }
+  
+  section {
+    margin-bottom: 40px;
+  }
+
+  ul.thread-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .post-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: auto; 
+    position: relative; /* Add overflow property to contain floated elements */
+  }
+  
+  .post-container:hover {
+    transform: translateY(-3px);
+  }
+  
+  .post-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .post-link:hover {
+    color: #0077cc;
+  }
+
+  .search-bar {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  #searchInput {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 60%;
+    margin-right: 10px;
+  }
+  
+  #searchInput:focus {
+    outline: none;
+    border-color: #55acee;
+    box-shadow: 0 0 5px rgba(85, 172, 238, 0.5);
+  }
+  
+  #searchBtn {
+    padding: 10px 20px;
+    background-color: #55acee;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  #searchBtn:hover {
+    background-color: #0077cc;
+  }
+
+  /* Clear Button Styles */
+#clearBtn {
+  padding: 10px 20px;
+  background-color: #ccc;
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#clearBtn:hover {
+  background-color: #ddd;
+}
+  
+.post-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: auto;
+  position: relative;
+  padding: 20px; /* Increased padding */
+}
+
+.profile-info {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 20px; /* Adjusted right position */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Align profile info to the right */
+}
+
+.post-content {
+  padding: 15px;
+  position: relative;
+  overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+.profile-picture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 5px; /* Spacing between picture and username */
+}
+
+.post-author {
+  color: #666;
+  margin: 0;
+}
